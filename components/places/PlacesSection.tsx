@@ -6,10 +6,11 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  type CollisionDetection,
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core';
-import { sortableKeyboardCoordinates, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { rectSortingStrategy, sortableKeyboardCoordinates, SortableContext } from '@dnd-kit/sortable';
 import { Compass, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { BrowserHomeData, Category, Shortcut } from '../../types/domain';
@@ -27,6 +28,16 @@ interface PlacesSectionProps {
   data: BrowserHomeData;
   mutate: (mutator: (data: BrowserHomeData) => BrowserHomeData) => Promise<BrowserHomeData>;
 }
+
+const placesCollisionDetection: CollisionDetection = (args) => {
+  if (String(args.active.id).startsWith('category:')) {
+    return closestCenter({
+      ...args,
+      droppableContainers: args.droppableContainers.filter((container) => container.data.current?.type === 'category'),
+    });
+  }
+  return closestCenter(args);
+};
 
 export function PlacesSection({ data, mutate }: PlacesSectionProps) {
   const { show } = useToast();
@@ -134,7 +145,7 @@ export function PlacesSection({ data, mutate }: PlacesSectionProps) {
   };
 
   return (
-    <section className="content-section" aria-labelledby="places-heading">
+    <section className="content-section content-section--places" aria-labelledby="places-heading">
       <div className="section-heading-row section-heading-row--compact">
         <p id="places-heading" className="eyebrow"><Compass size={15} />Places <span className="eyebrow__divider">/</span> Shortcuts</p>
         {categories.length > 0 && <button type="button" className="button button--quiet" onClick={() => setCategoryDialog({ open: true })}><Plus size={16} />New section</button>}
@@ -147,8 +158,8 @@ export function PlacesSection({ data, mutate }: PlacesSectionProps) {
           <button type="button" className="button button--primary" onClick={() => setPlaceDialog({ open: true })}><Plus size={16} />Add your first website</button>
         </div>
       ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setActiveShortcut(null)}>
-          <SortableContext items={categories.map((category) => `category:${category.id}`)} strategy={verticalListSortingStrategy}>
+        <DndContext sensors={sensors} collisionDetection={placesCollisionDetection} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setActiveShortcut(null)}>
+          <SortableContext items={categories.map((category) => `category:${category.id}`)} strategy={rectSortingStrategy}>
             <div className="category-stack">
               {categories.map((category) => {
                 const shortcuts = data.shortcuts.filter((shortcut) => shortcut.categoryId === category.id).sort((a, b) => a.order - b.order);

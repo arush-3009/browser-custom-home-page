@@ -19,7 +19,7 @@ export function ShortcutTile({ shortcut, onEdit, onDelete }: {
         <span className="shortcut-tile__name">{shortcut.name}</span>
       </a>
       <div className="shortcut-tile__menu" onPointerDown={(event) => event.stopPropagation()}>
-        <Menu>
+        <Menu label={`${shortcut.name} actions`}>
           <MenuItem className="menu-item" onSelect={onEdit}><Pencil size={15} />Edit</MenuItem>
           <MenuItem className="menu-item" onSelect={() => window.open(shortcut.url, '_blank')}><ExternalLink size={15} />Open in new tab</MenuItem>
           <MenuSeparator className="menu-separator" />

@@ -18,7 +18,7 @@ export function CategorySection({ category, shortcuts, onToggle, onAdd, onEditCa
 }) {
   const sortable = useSortable({ id: `category:${category.id}`, data: { type: 'category', category } });
   const droppable = useDroppable({ id: `category-drop:${category.id}`, data: { type: 'category-drop', categoryId: category.id } });
-  const style = { transform: CSS.Transform.toString(sortable.transform), transition: sortable.transition };
+  const style = { transform: CSS.Translate.toString(sortable.transform), transition: sortable.transition };
   return (
     <article ref={sortable.setNodeRef} style={style} className={`category-panel ${sortable.isDragging ? 'is-dragging' : ''}`}>
       <header className="category-header">
@@ -32,7 +32,7 @@ export function CategorySection({ category, shortcuts, onToggle, onAdd, onEditCa
         </div>
         <div className="category-actions">
           <button type="button" className="button button--quiet button--small" onClick={onAdd}><Plus size={15} />Add place</button>
-          <Menu>
+          <Menu label={`${category.name} section actions`}>
             <MenuItem className="menu-item" onSelect={onEditCategory}><Pencil size={15} />Rename section</MenuItem>
             <MenuSeparator className="menu-separator" />
             <MenuItem className="menu-item menu-item--danger" onSelect={onDeleteCategory}><Trash2 size={15} />Delete section</MenuItem>
