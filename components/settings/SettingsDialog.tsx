@@ -7,11 +7,12 @@ import { useToast } from '../common/Toast';
 import type { BackgroundSettings } from '../../types/domain';
 import { BackgroundPicker } from './BackgroundPicker';
 
-export function SettingsDialog({ open, onOpenChange, data, replaceData, updateBackground }: {
+export function SettingsDialog({ open, onOpenChange, data, replaceData, updateBackground, restorePlaces }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   data: BrowserHomeData;
   replaceData: (data: BrowserHomeData) => Promise<void>;
+  restorePlaces: (data: BrowserHomeData) => Promise<void>;
   updateBackground: (background: BackgroundSettings) => Promise<void>;
 }) {
   const { show } = useToast();
@@ -19,6 +20,7 @@ export function SettingsDialog({ open, onOpenChange, data, replaceData, updateBa
   const [preview, setPreview] = useState<BrowserHomeData | null>(null);
   const [importError, setImportError] = useState('');
   const [importing, setImporting] = useState(false);
+  const [placesOnly, setPlacesOnly] = useState(false);
 
   const exportData = () => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -53,10 +55,11 @@ export function SettingsDialog({ open, onOpenChange, data, replaceData, updateBa
     if (!preview) return;
     setImporting(true);
     try {
-      await replaceData(preview);
+      if (placesOnly) await restorePlaces(preview);
+      else await replaceData(preview);
       setPreview(null);
       onOpenChange(false);
-      show('Browser Home data imported');
+      show(placesOnly ? 'Sections and links restored' : 'Browser Home data imported');
     } catch (reason) {
       show('Import failed', { detail: reason instanceof Error ? reason.message : 'The data was not replaced.', tone: 'error' });
     } finally {
@@ -84,10 +87,14 @@ export function SettingsDialog({ open, onOpenChange, data, replaceData, updateBa
             <div><h3>Your data</h3><p>Keep a portable JSON backup, or move Browser Home to another Chrome profile.</p></div>
             <div className="settings-actions">
               <button type="button" className="button button--quiet" onClick={exportData}><Download size={16} />Export JSON</button>
-              <button type="button" className="button button--quiet" onClick={() => inputRef.current?.click()}><Upload size={16} />Import JSON</button>
+              <button type="button" className="button button--quiet" onClick={() => { setPlacesOnly(false); inputRef.current?.click(); }}><Upload size={16} />Import JSON</button>
               <input ref={inputRef} type="file" accept="application/json,.json" hidden onChange={(event) => void readImport(event)} />
             </div>
             {importError && <p className="form-error" role="alert">{importError}</p>}
+          </section>
+          <section className="settings-block">
+            <div><h3>Recover sections and links</h3><p>Add missing places from a backup while keeping your current background and workspaces.</p></div>
+            <button type="button" className="button button--quiet" onClick={() => { setPlacesOnly(true); inputRef.current?.click(); }}><Upload size={16} />Restore places</button>
           </section>
         </div>
       </AppDialog>
@@ -95,16 +102,16 @@ export function SettingsDialog({ open, onOpenChange, data, replaceData, updateBa
       <AppDialog
         open={Boolean(preview)}
         onOpenChange={(nextOpen) => { if (!nextOpen) setPreview(null); }}
-        title="Replace your Browser Home data?"
-        description="The import is valid. Review its contents before replacing what is currently stored."
+        title={placesOnly ? "Restore sections and links?" : "Replace your Browser Home data?"}
+        description={placesOnly ? "Missing sections and links will be added. Your current background, workspaces and existing places will be kept." : "The import is valid. Review its contents before replacing what is currently stored."}
         size="small"
         footer={<>
           <button type="button" className="button button--ghost" onClick={() => setPreview(null)}>Cancel</button>
-          <button type="button" className="button button--danger" onClick={() => void confirmImport()} disabled={importing}>{importing ? 'Replacing…' : 'Replace existing data'}</button>
+          <button type="button" className="button button--danger" onClick={() => void confirmImport()} disabled={importing}>{importing ? 'Saving…' : placesOnly ? 'Restore sections and links' : 'Replace existing data'}</button>
         </>}
       >
-        {preview && <div className="import-preview"><FileJson size={22} /><div><strong>{preview.shortcuts.length} places</strong><span>in {preview.categories.length} sections</span></div><div><strong>{preview.workspaces.length} workspaces</strong><span>with {preview.workspaces.reduce((sum, workspace) => sum + workspace.tabs.length, 0)} saved tabs</span></div></div>}
-        <p className="notice notice--danger">This replaces your current places and workspaces. Export first if you may want to restore them.</p>
+        {preview && <div className="import-preview"><FileJson size={22} /><div><strong>{preview.shortcuts.length} places</strong><span>in {preview.categories.length} sections</span></div>{!placesOnly && <div><strong>{preview.workspaces.length} workspaces</strong><span>with {preview.workspaces.reduce((sum, workspace) => sum + workspace.tabs.length, 0)} saved tabs</span></div>}</div>}
+        {!placesOnly && <p className="notice notice--danger">This replaces your current places and workspaces. Export first if you may want to restore them.</p>}
       </AppDialog>
     </>
   );

@@ -140,3 +140,31 @@ export function deleteCategory(
     shortcuts: normalizeShortcutOrder(moved, strategy.targetCategoryId),
   };
 }
+
+// Restore missing places without replacing backgrounds, workspaces or later edits.
+export function mergeRecoveredPlaces(current: BrowserHomeData, recovered: BrowserHomeData): BrowserHomeData {
+  const categories = [...current.categories];
+  const shortcuts = [...current.shortcuts];
+  const occupied = new Set([
+    ...categories.map((item) => item.id), ...shortcuts.map((item) => item.id),
+    ...current.workspaces.flatMap((item) => [item.id, ...item.tabs.map((tab) => tab.id), ...item.groups.map((group) => group.id)]),
+  ]);
+  const categoryMap = new Map<string, string>();
+  for (const category of byOrder(recovered.categories)) {
+    const existing = categories.find((item) => item.id === category.id);
+    if (existing) { categoryMap.set(category.id, existing.id); continue; }
+    const id = occupied.has(category.id) ? createId('cat') : category.id;
+    occupied.add(id);
+    categoryMap.set(category.id, id);
+    categories.push({ ...category, id, order: categories.length });
+  }
+  for (const shortcut of byOrder(recovered.shortcuts)) {
+    if (shortcuts.some((item) => item.id === shortcut.id)) continue;
+    const categoryId = categoryMap.get(shortcut.categoryId);
+    if (!categoryId) throw new Error('A recovered place refers to a missing section. Nothing was restored.');
+    const id = occupied.has(shortcut.id) ? createId('place') : shortcut.id;
+    occupied.add(id);
+    shortcuts.push({ ...shortcut, id, categoryId, order: shortcuts.filter((item) => item.categoryId === categoryId).length });
+  }
+  return { ...current, categories, shortcuts };
+}

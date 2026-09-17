@@ -6,6 +6,7 @@ import { PlacesSection } from '../../components/places/PlacesSection';
 import { SettingsDialog } from '../../components/settings/SettingsDialog';
 import { WorkspacesSection } from '../../components/workspaces/WorkspacesSection';
 import { useBrowserHomeData } from '../../lib/storage/use-data';
+import { mergeRecoveredPlaces } from '../../features/places/operations';
 import { writeData } from '../../lib/storage/repository';
 import { selectedBackgroundImage } from '../../features/backgrounds/presets';
 
@@ -107,6 +108,7 @@ function BrowserHomeApp() {
         updateBackground={async (background) => {
           await mutate((current) => ({ ...current, settings: { ...current.settings, background } }));
         }}
+        restorePlaces={async (recovered) => { await mutate((current) => mergeRecoveredPlaces(current, recovered)); }}
         replaceData={async (next) => { await writeData(next); refresh(); }}
       />
     </div>

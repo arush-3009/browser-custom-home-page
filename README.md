@@ -185,6 +185,7 @@ Open the settings button at the top-right of the New Tab page.
 
 - **Export JSON** downloads the complete versioned Browser Home data document.
 - **Import JSON** reads at most 10 MB, parses it safely, runs schema/migration validation, checks IDs and cross-references, and rejects malformed content with a useful error.
+- **Restore places** adds missing sections and links from a valid export while preserving the current background, workspaces, and existing places. Re-importing the same IDs does not duplicate them.
 - A valid import is not applied immediately. Browser Home previews the number of places, sections, workspaces, and tabs, then requires explicit confirmation before replacing current data.
 
 Unversioned/schema-version-0 place exports and schema-version-1 Browser Home data are migrated to the current schema where possible. Version 1 installs move to the new Alpine default while retaining the original Midnight treatment as a selectable preset. Unknown future versions are rejected rather than guessed at.
@@ -207,6 +208,10 @@ BrowserHomeData
 ```
 
 Stable UUID-based IDs are used for persisted identity. Temporary Chrome `tabId` and native group IDs are used only while a capture/restore operation is running and are never treated as durable identity.
+
+Storage reads never replace unreadable data with defaults or persist migrations. Invalid records stop edits with an error so the original record remains available for diagnosis. All writers, including extension initialization, share a Web Lock across the popup, New Tab pages and background worker. Migrations are persisted on the next successful save.
+
+Before a write, Browser Home saves and verifies the previous sections, shortcuts and workspaces under `browserHome:previousCollections`. This is a single rolling recovery copy, not a history of every revision; it excludes backgrounds to avoid duplicating large images. Saving stops if the backup cannot be stored or verified. The main record is then written and compared with the exact intended contents before a capture can close tabs. A missing main record with an existing recovery copy stops saving instead of creating an empty home. JSON exports remain the portable backup for the complete configuration.
 
 IndexedDB is not used. Uploaded backgrounds are resized and compressed before being stored as an embedded WebP data URL in the versioned settings record, which also keeps JSON export/import complete.
 
