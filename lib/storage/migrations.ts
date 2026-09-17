@@ -13,6 +13,10 @@ export function migrateData(input: unknown): BrowserHomeData {
   const current = browserHomeDataSchema.safeParse(input);
   if (current.success) return current.data as BrowserHomeData;
 
+  if (isRecord(input) && input.schemaVersion === 2) {
+    throw new Error(`The saved Browser Home data is invalid: ${current.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; ')}`);
+  }
+
   if (isRecord(input) && input.schemaVersion === 1) {
     const rawSettings = isRecord(input.settings) ? input.settings : {};
     const migrated = browserHomeDataSchema.safeParse({
@@ -30,6 +34,10 @@ export function migrateData(input: unknown): BrowserHomeData {
 
   if (!isRecord(input) || (input.schemaVersion !== 0 && input.schemaVersion !== undefined)) {
     throw new Error('This file is not a supported Browser Home data export.');
+  }
+
+  if (!Array.isArray(input.categories) || !Array.isArray(input.shortcuts)) {
+    throw new Error('This file is not a supported legacy Browser Home export.');
   }
 
   const timestamp = nowIso();

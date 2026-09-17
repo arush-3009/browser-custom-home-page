@@ -1,15 +1,10 @@
 import type { BackgroundRequest, OperationResult } from '../types/domain';
 import { captureWorkspace, restoreWorkspace } from '../features/workspaces/chrome-service';
-import { STORAGE_KEY } from '../lib/storage/repository';
-import { createDefaultData } from '../lib/storage/defaults';
+import { initializeData } from '../lib/storage/repository';
 
 export default defineBackground(() => {
   chrome.runtime.onInstalled.addListener(() => {
-    void chrome.storage.local.get(STORAGE_KEY).then((stored) => {
-      if (stored[STORAGE_KEY] === undefined) {
-        return chrome.storage.local.set({ [STORAGE_KEY]: createDefaultData() });
-      }
-    }).catch((error) => console.error('Browser Home could not initialize storage.', error));
+    void initializeData().catch((error: unknown) => console.error('Browser Home could not initialize storage.', error));
   });
 
   chrome.runtime.onMessage.addListener((request: BackgroundRequest, _sender, sendResponse: (result: OperationResult) => void) => {

@@ -10,7 +10,7 @@ import { useBrowserHomeData } from '../../lib/storage/use-data';
 type CaptureMode = 'new' | 'existing';
 
 export default function App() {
-  const { data } = useBrowserHomeData();
+  const { data, error: storageError } = useBrowserHomeData();
   const [tabs, setTabs] = useState<chrome.tabs.Tab[]>([]);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [mode, setMode] = useState<CaptureMode>('new');
@@ -170,11 +170,12 @@ export default function App() {
           )}
           <div className="capture-count"><span>{selected.size} selected</span>{mode === 'existing' && <small>Exact duplicate URLs will be skipped.</small>}</div>
 
+          {storageError && <p className="form-error" role="alert">{storageError}</p>}
           {result && <div className={`capture-result ${result.ok ? 'capture-result--success' : 'capture-result--error'}`} role={result.ok ? 'status' : 'alert'}>{result.ok ? <Check size={16} /> : <X size={16} />}<span><strong>{result.message}</strong>{result.detail && <small>{result.detail}</small>}</span></div>}
 
           <div className="capture-actions">
-            <button type="button" className="button button--secondary popup-save" onClick={() => void save(false)} disabled={saving !== null || selected.size === 0}><Save size={16} />{saving === 'save' ? 'Saving…' : 'Save workspace'}<small>Leave tabs open</small></button>
-            <button type="button" className="button button--primary popup-save" onClick={() => void save(true)} disabled={saving !== null || selected.size === 0}><Archive size={16} />{saving === 'close' ? 'Saving first…' : 'Save & close tabs'}<small>Close only after save</small></button>
+            <button type="button" className="button button--secondary popup-save" onClick={() => void save(false)} disabled={!data || saving !== null || selected.size === 0}><Save size={16} />{saving === 'save' ? 'Saving…' : 'Save workspace'}<small>Leave tabs open</small></button>
+            <button type="button" className="button button--primary popup-save" onClick={() => void save(true)} disabled={!data || saving !== null || selected.size === 0}><Archive size={16} />{saving === 'close' ? 'Saving first…' : 'Save & close tabs'}<small>Close only after save</small></button>
           </div>
         </section>
       </main>

@@ -16,7 +16,7 @@ describe('Browser Home schema', () => {
   it('rejects an active tab reference that is not in the workspace', () => {
     const data = validData();
     data.workspaces[0]!.activeSavedTabId = 'missing';
-    expect(() => validateImport(data)).toThrow(/supported|migrated/i);
+    expect(() => validateImport(data)).toThrow(/invalid|supported|migrated/i);
   });
 
   it('rejects malformed imports without changing them into empty data', () => {

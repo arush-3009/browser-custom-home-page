@@ -11,6 +11,7 @@ export function useBrowserHomeData() {
       setData(next);
       setError(null);
     }).catch((reason: unknown) => {
+      setData(null);
       setError(reason instanceof Error ? reason.message : 'Browser Home could not read its local data.');
     });
   }, []);
