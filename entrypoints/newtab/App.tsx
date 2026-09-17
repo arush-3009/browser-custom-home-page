@@ -9,6 +9,19 @@ import { useBrowserHomeData } from '../../lib/storage/use-data';
 import { writeData } from '../../lib/storage/repository';
 import { selectedBackgroundImage } from '../../features/backgrounds/presets';
 
+const GOOGLE_ACCOUNT_CHOOSER_URL = 'https://accounts.google.com/AccountChooser';
+
+function GoogleAccountMark() {
+  return (
+    <svg className="google-account-mark" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="#4285f4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.06H12v3.9h5.38A4.6 4.6 0 0 1 15.39 17v2.54h3.23c1.89-1.74 2.98-4.3 2.98-7.31Z" />
+      <path fill="#34a853" d="M12 22c2.7 0 4.97-.9 6.62-2.46L15.39 17c-.9.6-2.04.96-3.39.96-2.6 0-4.81-1.76-5.6-4.13H3.06v2.62A10 10 0 0 0 12 22Z" />
+      <path fill="#fbbc05" d="M6.4 13.83a6 6 0 0 1 0-3.66V7.55H3.06a10 10 0 0 0 0 8.9l3.34-2.62Z" />
+      <path fill="#ea4335" d="M12 6.04c1.47 0 2.79.5 3.83 1.5l2.87-2.87A9.64 9.64 0 0 0 12 2a10 10 0 0 0-8.94 5.55l3.34 2.62c.79-2.37 3-4.13 5.6-4.13Z" />
+    </svg>
+  );
+}
+
 function BrowserHomeApp() {
   const { data, error, mutate, refresh } = useBrowserHomeData();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -52,9 +65,22 @@ function BrowserHomeApp() {
       <div className="background-scrim" aria-hidden="true" />
       <div className="background-texture" aria-hidden="true" />
       <header className="topbar">
-        <Tooltip label="Customize Browser Home">
-          <button type="button" className="icon-button topbar__settings" onClick={() => setSettingsOpen(true)} aria-label="Customize Browser Home"><Settings2 size={18} /></button>
-        </Tooltip>
+        <div className="topbar__actions">
+          <Tooltip label="Switch Google account">
+            <a
+              className="icon-button topbar__google-account"
+              href={GOOGLE_ACCOUNT_CHOOSER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Switch Google account"
+            >
+              <GoogleAccountMark />
+            </a>
+          </Tooltip>
+          <Tooltip label="Customize Browser Home">
+            <button type="button" className="icon-button topbar__settings" onClick={() => setSettingsOpen(true)} aria-label="Customize Browser Home"><Settings2 size={18} /></button>
+          </Tooltip>
+        </div>
       </header>
 
       <main>

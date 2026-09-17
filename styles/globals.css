@@ -92,8 +92,11 @@ a { color: inherit; text-decoration: none; }
 .brand--compact { font-size: 13px; gap: 8px; }
 .brand__mark { width: 33px; height: 33px; display: inline-grid; place-items: center; border-radius: 10px; color: #e7e2ff; background: linear-gradient(145deg, rgba(169, 151, 255, .25), rgba(111, 91, 205, .14)); border: 1px solid rgba(197, 186, 255, .17); box-shadow: inset 0 1px rgba(255,255,255,.08); }
 .brand--compact .brand__mark { width: 27px; height: 27px; border-radius: 8px; }
-.topbar__settings { color: var(--muted); }
-.newtab-shell--photo .topbar__settings { color: rgba(255,255,255,.8); background: rgba(7,9,14,.24); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(12px); }
+.topbar__actions { display: flex; align-items: center; gap: 5px; }
+.topbar__settings, .topbar__google-account { color: var(--muted); }
+.newtab-shell--photo .topbar__settings, .newtab-shell--photo .topbar__google-account { color: rgba(255,255,255,.8); background: rgba(7,9,14,.24); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(12px); }
+.google-account-mark { width: 18px; height: 18px; opacity: .72; transition: opacity .16s ease, transform .16s ease; }
+.topbar__google-account:hover .google-account-mark, .topbar__google-account:focus-visible .google-account-mark { opacity: 1; transform: scale(1.04); }
 
 .icon-button { appearance: none; border: 0; background: transparent; color: var(--muted); width: 34px; height: 34px; border-radius: 9px; display: inline-grid; place-items: center; cursor: pointer; transition: color .16s ease, background .16s ease, opacity .16s ease; flex: 0 0 auto; }
 .icon-button:hover { color: var(--text); background: rgba(255,255,255,.07); }
